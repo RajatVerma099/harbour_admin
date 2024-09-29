@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Data - Edit Jobs</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            max-width: 25vw;
+            resize: both;
+        }
+
+        /* Search Bar */
+        .search-container {
+            width: 90%;
+            max-width: 95vw;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: linear-gradient(to bottom right, #ffffff, #e6e9f0);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 95vw;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        th,
+        td {
+            padding: 15px 20px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: #fff;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        td input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        td input[type="text"]:focus {
+            border-color: #007BFF;
+        }
+
+        /* Submit Button */
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        tr.highlighted {
+            background-color: #E6E6FA;
+            /* Light purple */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            th,
+            td {
+                padding: 10px 12px;
+            }
+
+            button {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Edit Job Data</h1>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search for jobs..." onkeyup="filterJobs()">
+    </div>
+
+    <div class="table-container">
+        <table id="jobsTable">
+            <thead>
+                <tr>
+                    <th>Apply Link</th>
+                    <th>Company</th>
+                    <th>Date Posted</th>
+                    <th>Description</th>
+                    <th>Experience</th>
+                    <th>Location</th>
+                    <th>More Info Link</th>
+                    <th>Title</th>
+                    <th>Submit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to load data from the API
+        async function loadJobsData() {
+            try {
+                const response = await fetch('/jobs'); // Fetch jobs from your Flask app
+                const jobs = await response.json();
+
+                const tbody = document.querySelector('#jobsTable tbody');
+                tbody.innerHTML = ''; // Clear existing table rows
+
+                jobs.forEach(job => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('id', `row-${job.id}`);
+                    row.innerHTML = `
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job['apply-link']}" id="apply-link-${job.id}" /></td>
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job.company}" id="company-${job.id}" /></td>
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job['date-posted']}" id="date-posted-${job.id}" /></td>
+                        <td><textarea onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" id="desc-${job.id}">${job.desc}</textarea></td>
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job.experience}" id="experience-${job.id}" /></td>
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job.location}" id="location-${job.id}" /></td>
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job.moreInfoLink}" id="moreInfoLink-${job.id}" /></td>
+                        <td><input onfocus="highlightRow('${job.id}')" onblur="removeHighlightRow('${job.id}')" type="text" value="${job.title}" id="title-${job.id}" /></td>
+                        <td><button onclick="submitChanges('${job.id}')">Submit</button></td>
+                        <td><button onclick="deleteJob('${job.id}')" style="background-color:red">Delete</button></td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching jobs:', error);
+            }
+        }
+
+        // Function to submit changes to the API
+        async function submitChanges(jobId) {
+            const updatedJob = {
+                'apply-link': document.getElementById(`apply-link-${jobId}`).value,
+                company: document.getElementById(`company-${jobId}`).value,
+                'date-posted': document.getElementById(`date-posted-${jobId}`).value,
+                desc: document.getElementById(`desc-${jobId}`).value,
+                experience: document.getElementById(`experience-${jobId}`).value,
+                location: document.getElementById(`location-${jobId}`).value,
+                moreInfoLink: document.getElementById(`moreInfoLink-${jobId}`).value,
+                title: document.getElementById(`title-${jobId}`).value
+            };
+
+            try {
+                await fetch('/update-job', { // Send updated data to Flask app
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: jobId, jobData: updatedJob })
+                });
+
+                alert('Job updated successfully! Kindly Refresh');
+            } catch (error) {
+                console.error('Error updating job:', error);
+            }
+        }
+
+        function highlightRow(jobId) {
+            const row = document.getElementById(`row-${jobId}`);
+            row.classList.add('highlighted');
+        }
+
+        function removeHighlightRow(jobId) {
+            const row = document.getElementById(`row-${jobId}`);
+            row.classList.remove('highlighted');
+        }
+
+        // Function to delete a job
+        async function deleteJob(jobId) {
+            try {
+                await fetch('/delete-job', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: jobId })
+                });
+
+                alert('Job deleted successfully! Kindly Refresh');
+            } catch (error) {
+                console.error('Error deleting job:', error);
+            }
+        }
+
+        // Function to filter jobs based on search input
+        function filterJobs() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#jobsTable tbody tr');
+
+            rows.forEach(row => {
+                const cells = Array.from(row.cells);
+                const matches = cells.some(cell => cell.textContent.toLowerCase().includes(searchInput));
+                row.style.display = matches ? '' : 'none';
+            });
+        }
+
+        // Load the jobs data when the page loads
+        window.onload = loadJobsData;
+    </script>
+
+</body>
+
+</html>
