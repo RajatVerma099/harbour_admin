@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request
 import firebase_admin
 from firebase_admin import credentials, firestore
 import time
+import os
 
 app = Flask(__name__)
 
