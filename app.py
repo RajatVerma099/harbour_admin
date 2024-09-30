@@ -34,6 +34,7 @@ def update_job():
     job_id = data.get('id')
     # print(data)
     updated_job_data = data.get('jobData')
+    updated_job_data['title'] = updated_job_data['company'] + " | " + updated_job_data['job-title']
     # print(updated_job_data)
 
     if not job_id or not updated_job_data:
